@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: autoverse_db
+    environment:
+      POSTGRES_USER: autoverse
+      POSTGRES_PASSWORD: autoverse_password
+      POSTGRES_DB: autoverse_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: autoverse_backend
+    environment:
+      DATABASE_URL: postgresql://autoverse:autoverse_password@postgres:5432/autoverse_db
+      JWT_SECRET: your_jwt_secret_change_in_production
+      PORT: 5000
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
