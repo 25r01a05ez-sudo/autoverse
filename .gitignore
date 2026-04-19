@@ -8,6 +8,10 @@ build/
 .next/
 out/
 
+# TypeScript cache
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+
 # Environment variables
 .env
 .env.local
