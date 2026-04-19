@@ -219,7 +219,7 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div role="status" aria-live="polite">Loading...</div>}>
+    <Suspense fallback={<div role="status" aria-live="polite" aria-label="Loading signup form">Loading...</div>}>
       <SignupForm />
     </Suspense>
   );
