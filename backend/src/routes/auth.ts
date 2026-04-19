@@ -1,11 +1,17 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { authenticate, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 const prisma = new PrismaClient();
+
+function createToken(payload: object): string {
+  const secret = process.env.JWT_SECRET as string;
+  const options: SignOptions = { expiresIn: 7 * 24 * 60 * 60 }; // 7 days in seconds
+  return jwt.sign(payload, secret, options);
+}
 
 // POST /api/auth/register
 router.post('/register', async (req, res, next) => {
@@ -61,11 +67,7 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    );
+    const token = createToken({ id: user.id, email: user.email, role: user.role });
 
     res.status(201).json({
       message: 'Account created successfully',
@@ -105,11 +107,7 @@ router.post('/login', async (req, res, next) => {
       return;
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET!,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    );
+    const token = createToken({ id: user.id, email: user.email, role: user.role });
 
     res.json({
       message: 'Login successful',
