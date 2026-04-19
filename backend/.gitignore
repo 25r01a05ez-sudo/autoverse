@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+
+# Prisma
+prisma/migrations/
+
+# Uploads
+uploads/
+
+# OS
+.DS_Store
