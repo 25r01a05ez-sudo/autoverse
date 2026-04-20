@@ -1,38 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-interface User {
-  fullName: string;
-  email: string;
-  role: string;
-}
+import { useUser, useClerk } from '@clerk/nextjs';
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const u = JSON.parse(userData);
-      if (u.role !== 'ADMIN') {
-        window.location.href = '/login';
-        return;
-      }
-      setUser(u);
-    } else {
-      window.location.href = '/login';
-    }
-  }, []);
+  const handleLogout = () => signOut({ redirectUrl: '/' });
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/';
-  };
-
-  if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!isLoaded) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,7 +18,7 @@ export default function AdminDashboard() {
           <Link href="/" className="text-xl font-bold text-indigo-600">🚗 AUTOVERSE</Link>
           <div className="flex items-center gap-4">
             <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">ADMIN</span>
-            <span className="text-gray-600 text-sm">{user.fullName}</span>
+            <span className="text-gray-600 text-sm">{user?.firstName ?? user?.emailAddresses[0]?.emailAddress}</span>
             <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700 font-medium">
               Logout
             </button>

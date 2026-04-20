@@ -1,26 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useAuth, useClerk, UserButton, SignInButton, SignUpButton } from '@clerk/nextjs';
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState('');
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    if (token && user) {
-      setIsLoggedIn(true);
-      setUserRole(JSON.parse(user).role?.toLowerCase() || '');
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/';
-  };
+  const { isSignedIn } = useAuth();
+  const { signOut } = useClerk();
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -30,29 +15,31 @@ export default function Navbar() {
           <span className="text-xl font-bold text-indigo-600">AUTOVERSE</span>
         </Link>
         <div className="flex items-center space-x-4">
-          {isLoggedIn ? (
+          {isSignedIn ? (
             <>
-              <Link href={`/${userRole}`} className="text-gray-600 hover:text-indigo-600 font-medium">
+              <Link href="/customer" className="text-gray-600 hover:text-indigo-600 font-medium">
                 Dashboard
               </Link>
               <button
-                onClick={handleLogout}
+                onClick={() => signOut({ redirectUrl: '/' })}
                 className="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 font-medium transition-colors"
               >
                 Logout
               </button>
+              <UserButton />
             </>
           ) : (
             <>
-              <Link href="/login" className="text-gray-600 hover:text-indigo-600 font-medium">
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors"
-              >
-                Sign Up
-              </Link>
+              <SignInButton mode="redirect">
+                <button className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                  Login
+                </button>
+              </SignInButton>
+              <SignUpButton mode="redirect">
+                <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors">
+                  Sign Up
+                </button>
+              </SignUpButton>
             </>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { createClerkClient, verifyToken } from '@clerk/express';
+import { PrismaClient } from '@prisma/client';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -7,9 +8,16 @@ export interface AuthRequest extends Request {
     email: string;
     role: string;
   };
+  clerkUserId?: string;
 }
 
-export function authenticate(req: AuthRequest, res: Response, next: NextFunction): void {
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+});
+
+const prisma = new PrismaClient();
+
+export async function authenticate(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -20,12 +28,29 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-      email: string;
-      role: string;
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
+    const clerkUserId = payload.sub;
+
+    // Fetch the user's email from Clerk
+    const clerkUser = await clerkClient.users.getUser(clerkUserId);
+    const email = clerkUser.emailAddresses[0]?.emailAddress ?? '';
+
+    // Look up the user in the database by email to get Prisma id and role
+    const dbUser = await prisma.user.findUnique({ where: { email } });
+
+    if (!dbUser) {
+      res.status(401).json({ error: 'User not found in database' });
+      return;
+    }
+
+    req.clerkUserId = clerkUserId;
+    req.user = {
+      id: dbUser.id,
+      email: dbUser.email,
+      role: dbUser.role,
     };
-    req.user = decoded;
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
