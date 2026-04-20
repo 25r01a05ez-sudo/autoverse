@@ -11,8 +11,8 @@ import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
-if (!process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET environment variable is not set. Refusing to start.');
+if (!process.env.CLERK_SECRET_KEY) {
+  console.error('FATAL: CLERK_SECRET_KEY environment variable is not set. Refusing to start.');
   process.exit(1);
 }
 

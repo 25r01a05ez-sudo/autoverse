@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { auth } from '@clerk/nextjs/server';
+import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+  const isSignedIn = !!userId;
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50">
       {/* Navigation */}
@@ -11,15 +16,27 @@ export default function Home() {
             <h1 className="text-2xl font-bold text-indigo-600">AUTOVERSE</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/login" className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors"
-            >
-              Get Started
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link href="/customer" className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                  Dashboard
+                </Link>
+                <UserButton />
+              </>
+            ) : (
+              <>
+                <SignInButton mode="redirect">
+                  <button className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                    Login
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="redirect">
+                  <button className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 font-medium transition-colors">
+                    Get Started
+                  </button>
+                </SignUpButton>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -37,18 +54,16 @@ export default function Home() {
           Browse verified cars from trusted, GST-registered dealers. No fraud, no middlemen — just honest deals and transparent pricing.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/signup"
-            className="bg-indigo-600 text-white px-8 py-4 rounded-xl hover:bg-indigo-700 font-semibold text-lg transition-colors shadow-lg shadow-indigo-200"
-          >
-            Browse Cars →
-          </Link>
-          <Link
-            href="/signup?role=dealer"
-            className="border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-xl hover:bg-indigo-50 font-semibold text-lg transition-colors"
-          >
-            List Your Cars
-          </Link>
+          <SignUpButton mode="redirect">
+            <button className="bg-indigo-600 text-white px-8 py-4 rounded-xl hover:bg-indigo-700 font-semibold text-lg transition-colors shadow-lg shadow-indigo-200">
+              Browse Cars →
+            </button>
+          </SignUpButton>
+          <SignUpButton mode="redirect">
+            <button className="border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-xl hover:bg-indigo-50 font-semibold text-lg transition-colors">
+              List Your Cars
+            </button>
+          </SignUpButton>
         </div>
       </section>
 
@@ -113,18 +128,16 @@ export default function Home() {
             Join thousands of buyers and trusted dealers on India&apos;s most transparent car marketplace.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/signup"
-              className="bg-indigo-600 text-white px-8 py-4 rounded-xl hover:bg-indigo-700 font-semibold text-lg transition-colors"
-            >
-              Sign Up Free
-            </Link>
-            <Link
-              href="/signup?role=dealer"
-              className="bg-white text-gray-900 px-8 py-4 rounded-xl hover:bg-gray-100 font-semibold text-lg transition-colors"
-            >
-              Register as Dealer
-            </Link>
+            <SignUpButton mode="redirect">
+              <button className="bg-indigo-600 text-white px-8 py-4 rounded-xl hover:bg-indigo-700 font-semibold text-lg transition-colors">
+                Sign Up Free
+              </button>
+            </SignUpButton>
+            <SignUpButton mode="redirect">
+              <button className="bg-white text-gray-900 px-8 py-4 rounded-xl hover:bg-gray-100 font-semibold text-lg transition-colors">
+                Register as Dealer
+              </button>
+            </SignUpButton>
           </div>
         </div>
       </section>

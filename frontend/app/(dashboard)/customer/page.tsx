@@ -1,30 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-interface User {
-  fullName: string;
-  email: string;
-  role: string;
-}
+import { useUser, useClerk } from '@clerk/nextjs';
 
 export default function CustomerDashboard() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) setUser(JSON.parse(userData));
-    else window.location.href = '/login';
-  }, []);
+  const handleLogout = () => signOut({ redirectUrl: '/' });
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/';
-  };
-
-  if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!isLoaded) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,7 +17,7 @@ export default function CustomerDashboard() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="text-xl font-bold text-indigo-600">🚗 AUTOVERSE</Link>
           <div className="flex items-center gap-4">
-            <span className="text-gray-600 text-sm">Hello, {user.fullName}</span>
+            <span className="text-gray-600 text-sm">Hello, {user?.firstName ?? user?.emailAddresses[0]?.emailAddress}</span>
             <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700 font-medium">
               Logout
             </button>
